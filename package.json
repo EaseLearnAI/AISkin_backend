@@ -12,7 +12,8 @@
     "test:analysis": "node tests/ingredient_analysis_test.js",
     "test:updated": "node tests/updated_product_test.js",
     "test:conflict": "node tests/conflict-test.js",
-    "test:plan": "node tests/plan-test.js"
+    "test:plan": "node tests/plan-test.js",
+    "test:skin": "node tests/skin_analysis_test.js"
   },
   "keywords": [
     "ai",
@@ -35,6 +36,7 @@
     "mongoose": "^7.6.3",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "openai": "^5.6.0",
     "validator": "^13.11.0"
   },
   "devDependencies": {
