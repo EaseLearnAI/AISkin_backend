@@ -6,29 +6,29 @@ const mongoose = require('mongoose');
 // Register a new user
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, phone, password } = req.body;
 
     // Validate required fields
-    if (!name || !email || !password) {
+    if (!name || !phone || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide name, email and password'
+        message: '请提供姓名、手机号和密码'
       });
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ phone });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'User with this email already exists'
+        message: '该手机号已被注册'
       });
     }
 
     // Create user
     const user = await User.create({
       name,
-      email,
+      phone,
       password
     });
 
@@ -40,7 +40,7 @@ exports.register = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message: '用户注册成功',
       token,
       data: {
         user
@@ -49,7 +49,7 @@ exports.register = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: 'Failed to register user',
+      message: '注册失败',
       error: error.message
     });
   }
@@ -58,24 +58,24 @@ exports.register = async (req, res) => {
 // Login user
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { phone, password } = req.body;
 
     // Validate required fields
-    if (!email || !password) {
+    if (!phone || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email and password'
+        message: '请提供手机号和密码'
       });
     }
 
     // Find user
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ phone }).select('+password');
 
     // Check if user exists and password is correct
     if (!user || !(await user.correctPassword(password, user.password))) {
       return res.status(401).json({
         success: false,
-        message: 'Incorrect email or password'
+        message: '手机号或密码错误'
       });
     }
 
@@ -87,7 +87,7 @@ exports.login = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Logged in successfully',
+      message: '登录成功',
       token,
       data: {
         user
@@ -96,7 +96,7 @@ exports.login = async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: 'Failed to login',
+      message: '登录失败',
       error: error.message
     });
   }

@@ -1,24 +1,32 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const validator = require('validator');
+
+// 手机号验证函数
+const isValidPhone = (phone) => {
+  // 中国手机号验证：11位数字，以1开头
+  const phoneRegex = /^1[3-9]\d{9}$/;
+  return phoneRegex.test(phone);
+};
 
 const userSchema = new mongoose.Schema({
-  email: {
+  phone: {
     type: String,
-    required: [true, 'Email is required'],
+    required: [true, '手机号是必需的'],
     unique: true,
-    lowercase: true,
-    validate: [validator.isEmail, 'Please provide a valid email']
+    validate: {
+      validator: isValidPhone,
+      message: '请提供有效的手机号'
+    }
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
-    minlength: 8,
+    required: [true, '密码是必需的'],
+    minlength: 6,
     select: false // Don't include password in query results by default
   },
   name: {
     type: String,
-    required: [true, 'Name is required']
+    required: [true, '姓名是必需的']
   },
   createdAt: {
     type: Date,
