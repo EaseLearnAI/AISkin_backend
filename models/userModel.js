@@ -28,6 +28,39 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, '姓名是必需的']
   },
+  gender: {
+    type: String,
+    enum: ['male', 'female'],
+    required: [true, '性别是必需的']
+  },
+  age: {
+    type: Number,
+    min: [13, '年龄不能小于13岁'],
+    max: [120, '年龄不能超过120岁']
+  },
+  // 生理周期相关信息（仅女性用户）
+  menstrualCycle: {
+    isInCycle: {
+      type: Boolean,
+      default: false
+    },
+    cycleDay: {
+      type: Number,
+      min: 1,
+      max: 40,
+      default: null
+    },
+    cycleLength: {
+      type: Number,
+      min: 21,
+      max: 40,
+      default: 28
+    },
+    lastUpdated: {
+      type: Date,
+      default: null
+    }
+  },
   createdAt: {
     type: Date,
     default: Date.now

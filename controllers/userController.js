@@ -6,13 +6,21 @@ const mongoose = require('mongoose');
 // Register a new user
 exports.register = async (req, res) => {
   try {
-    const { name, phone, password } = req.body;
+    const { name, phone, password, gender } = req.body;
 
     // Validate required fields
-    if (!name || !phone || !password) {
+    if (!name || !phone || !password || !gender) {
       return res.status(400).json({
         success: false,
-        message: '请提供姓名、手机号和密码'
+        message: '请提供姓名、手机号、密码和性别'
+      });
+    }
+
+    // Validate gender
+    if (!['male', 'female'].includes(gender)) {
+      return res.status(400).json({
+        success: false,
+        message: '性别只能选择男性或女性'
       });
     }
 
@@ -29,7 +37,8 @@ exports.register = async (req, res) => {
     const user = await User.create({
       name,
       phone,
-      password
+      password,
+      gender
     });
 
     // Generate token
@@ -160,6 +169,167 @@ exports.updateUsername = async (req, res) => {
     res.status(400).json({
       success: false,
       message: '更新用户名失败',
+      error: error.message
+    });
+  }
+};
+
+// Update gender
+exports.updateGender = async (req, res) => {
+  try {
+    const { gender } = req.body;
+
+    // Validate gender
+    if (!gender) {
+      return res.status(400).json({
+        success: false,
+        message: '请提供性别'
+      });
+    }
+
+    if (!['male', 'female'].includes(gender)) {
+      return res.status(400).json({
+        success: false,
+        message: '性别只能选择男性或女性'
+      });
+    }
+
+    // Update user
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { gender },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: '用户不存在'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: '性别更新成功',
+      data: {
+        user
+      }
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: '更新性别失败',
+      error: error.message
+    });
+  }
+};
+
+// Update age
+exports.updateAge = async (req, res) => {
+  try {
+    const { age } = req.body;
+
+    // Validate age
+    if (!age) {
+      return res.status(400).json({
+        success: false,
+        message: '请提供年龄'
+      });
+    }
+
+    if (age < 13 || age > 120) {
+      return res.status(400).json({
+        success: false,
+        message: '年龄必须在13-120岁之间'
+      });
+    }
+
+    // Update user
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { age },
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: '用户不存在'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: '年龄更新成功',
+      data: {
+        user
+      }
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: '更新年龄失败',
+      error: error.message
+    });
+  }
+};
+
+// Update menstrual cycle
+exports.updateMenstrualCycle = async (req, res) => {
+  try {
+    const { isInCycle, cycleDay, cycleLength } = req.body;
+
+    // 获取用户信息检查性别
+    const currentUser = await User.findById(req.user._id);
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: '用户不存在'
+      });
+    }
+
+    if (currentUser.gender !== 'female') {
+      return res.status(400).json({
+        success: false,
+        message: '只有女性用户可以设置生理周期信息'
+      });
+    }
+
+    // 构建更新数据
+    const updateData = {
+      'menstrualCycle.lastUpdated': new Date()
+    };
+
+    if (typeof isInCycle === 'boolean') {
+      updateData['menstrualCycle.isInCycle'] = isInCycle;
+    }
+
+    if (cycleDay && cycleDay >= 1 && cycleDay <= 40) {
+      updateData['menstrualCycle.cycleDay'] = cycleDay;
+    }
+
+    if (cycleLength && cycleLength >= 21 && cycleLength <= 40) {
+      updateData['menstrualCycle.cycleLength'] = cycleLength;
+    }
+
+    // Update user
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: '生理周期信息更新成功',
+      data: {
+        user
+      }
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: '更新生理周期信息失败',
       error: error.message
     });
   }

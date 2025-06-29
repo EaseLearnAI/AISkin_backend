@@ -381,10 +381,49 @@ const getSkinAnalysisStats = async (req, res) => {
   }
 };
 
+/**
+ * 获取用户最新的皮肤分析
+ */
+const getLatestSkinAnalysis = async (req, res) => {
+  console.log('🔍 获取用户最新皮肤分析');
+  console.log('👤 用户ID:', req.user.id);
+
+  try {
+    const latestAnalysis = await SkinAnalysis.findOne({ createdBy: req.user.id })
+      .sort({ createdAt: -1 })
+      .populate('createdBy', 'name email');
+
+    if (!latestAnalysis) {
+      console.log('❌ 未找到任何分析记录');
+      return res.status(404).json({
+        success: false,
+        message: '暂无皮肤分析记录，请先进行皮肤检测'
+      });
+    }
+
+    console.log('✅ 最新分析记录获取成功，分析时间:', latestAnalysis.createdAt);
+
+    res.json({
+      success: true,
+      data: {
+        analysis: latestAnalysis
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ 获取最新分析失败:', error);
+    res.status(500).json({
+      success: false,
+      message: '获取最新分析失败: ' + error.message
+    });
+  }
+};
+
 module.exports = {
   uploadAndAnalyzeSkin,
   getUserSkinAnalyses,
   getSkinAnalysisDetail,
   deleteSkinAnalysis,
-  getSkinAnalysisStats
+  getSkinAnalysisStats,
+  getLatestSkinAnalysis
 }; 
